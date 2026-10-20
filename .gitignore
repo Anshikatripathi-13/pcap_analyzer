@@ -1,0 +1,36 @@
+# Python bytecode and test caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Large or sensitive capture files
+*.pcap
+*.pcapng
+!samples/README.md
+
+# Generated reports in reports folder
+reports/*.md
+reports/*.pdf
+!reports/.gitkeep
+
+# Rust and Python build artifacts
+rust/target/
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Streamlit local configuration and state
+.streamlit/
+
+# OS and IDE temporary files
+.DS_Store
+Thumbs.db
+*.tmp

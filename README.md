@@ -1,386 +1,414 @@
 # PCAP Forensic Analyzer
 
-An interactive cybersecurity tool for automated analysis of **PCAP** and **PCAPNG** network captures. The project complements Wireshark by automating repetitive digital forensics and incident response (DFIR) tasks such as threat detection, IOC extraction, forensic reporting, and traffic visualization.
+An interactive cybersecurity tool for automated analysis of **PCAP** and **PCAPNG** network captures. The project complements Wireshark by automating repetitive digital forensics and incident response (DFIR) tasks such as threat detection, IOC extraction, credential analysis, forensic reporting, and traffic visualization.
 
 ---
 
 ## Why this exists
 
-Wireshark is an industry-standard packet analyzer and excels at protocol-level inspection. However, forensic investigations often require additional manual effort to identify suspicious activity, extract Indicators of Compromise (IOCs), and prepare investigation reports.
+Wireshark is an industry-standard packet analyzer and excels at protocol-level inspection. However, forensic investigations often require additional manual effort to identify suspicious activity, extract Indicators of Compromise (IOCs), triage cleartext credentials, and prepare investigation reports.
 
-This project focuses on **automating those investigation tasks**, enabling faster triage of packet captures while still allowing analysts to use Wireshark for detailed packet inspection when required.
+This project focuses on **automating those investigation tasks**, enabling faster triage of packet captures while still allowing analysts to use Wireshark for deep packet inspection when required.
 
 | Manual Wireshark Workflow | PCAP Forensic Analyzer |
 |---------------------------|------------------------|
-| Manual packet inspection | Automated traffic analysis dashboard |
-| Manual IOC extraction | One-click extraction of external IPs, domains and URLs |
-| Manual report writing | Automatic Markdown forensic report generation |
-| Manual threat hunting | Rule-based threat detection modules |
-| Limited visualization | Interactive charts, timeline and communication graph |
-| Requires display-filter expertise | Beginner-friendly dashboard interface |
+| Manual packet inspection | Automated traffic analysis dashboard & packet viewer |
+| Manual IOC extraction | One-click extraction of external IPs, domains, and URLs |
+| Manual report writing | Automatic Markdown & tamper-evident PDF forensic report generation |
+| Manual threat hunting | Rule-based threat detection modules (Port Scan, Beaconing, DNS Tunneling, Plaintext Credentials) |
+| Limited visualization | Interactive charts, traffic timeline, and network communication graph |
+| Requires display-filter expertise | Beginner-friendly Security Operations Center (SOC) style dashboard |
 
 ---
 
-# Features
+## Technology Stack
 
-### Packet Analysis
-- Upload and analyze **PCAP** and **PCAPNG** files
-- Automatic packet parsing
-- Packet statistics and protocol distribution
-- Source and destination IP analysis
-- Interactive packet viewer
-
-### Threat Detection
-The analyzer automatically detects common suspicious behaviors including:
-
-- **Port Scan Detection**
-  - Identifies hosts attempting connections to many destination ports within a short time window.
-
-- **Beaconing Detection**
-  - Detects periodic communication patterns commonly associated with Command & Control (C2) traffic.
-
-- **DNS Tunneling Detection**
-  - Flags suspicious DNS traffic based on query frequency and entropy.
-
-- **Plaintext Credential Detection**
-  - Detects credentials transmitted over insecure protocols including HTTP, FTP and Telnet.
+- **Core & Parsing:** Python 3.10+, [Scapy](https://scapy.net/) (packet decoding & synthesis)
+- **Frontend & UI:** [Streamlit](https://streamlit.io/) (responsive SOC theme with dark/light mode toggle), [Plotly Express & Graph Objects](https://plotly.com/python/) (interactive visualizations)
+- **Network Analysis:** [NetworkX](https://networkx.org/) (host communication topology), [Pandas](https://pandas.pydata.org/) (statistical aggregation)
+- **Forensic Reporting & Integrity:** [ReportLab](https://www.reportlab.com/) (multi-page PDF generation), Cryptographic hashing (`hashlib` MD5, SHA-1, SHA-256 with sidecars)
+- **Extensibility:** [FastMCP](https://github.com/jlowin/fastmcp) (Model Context Protocol server for AI assistant integrations)
+- **Optional Acceleration:** Native Rust engine (`rust/`) with automatic fallback to pure Python
 
 ---
 
-### IOC (Indicators of Compromise) Extraction
+## Features
 
-Automatically extracts:
+### 1. Packet Analysis & Triage
+- Upload and analyze **PCAP** and **PCAPNG** captures.
+- Automatic packet parsing with protocol classification (TCP, UDP, ICMP, DNS, HTTP, TLS, ARP).
+- Comprehensive traffic statistics: total packets, byte volume, duration, packet rates, unique endpoints, and active sessions.
+- Bidirectional host conversation aggregation and Top Talkers analysis.
+- Interactive Packet Inspector with hex/ASCII payload dumps.
 
-- External IP addresses
-- Domains
-- URLs
+### 2. Rule-Based Threat Detection
+The analyzer automatically inspects traffic for suspicious patterns:
+- **Port Scan Detection:** Identifies reconnaissance activity where a source connects to many destination ports within a short time window.
+- **C2 Beaconing Detection:** Detects periodic Command & Control communication using interval timing analysis and jitter variance.
+- **DNS Tunneling Detection:** Flags data exfiltration over DNS based on subdomain query frequency and Shannon entropy.
+- **Plaintext Credential Exposure:** Detects unencrypted credentials transmitted over HTTP POST, Basic Auth, FTP, and Telnet.
 
-with downloadable CSV export.
+### 3. Password Forensics & Triage
+- Specialized credential inspector identifying exposed usernames, passwords, and tokens.
+- Weak and default password triage against curated forensic wordlists.
+- Credential reuse tracking across multiple destination hosts.
+- Sensitive value masking toggle for secure screen sharing.
+- Downloadable CSV export of findings.
 
----
+### 4. Indicators of Compromise (IOC) Extraction
+- Automated extraction of external IP addresses, domain names, and URLs.
+- RFC 1918 / RFC 5737 filtering to separate internal traffic from external indicators.
+- One-click CSV export of extracted IOCs.
 
-### Evidence Integrity
+### 5. Evidence Integrity & Cryptographic Sidecars
+- Cryptographic hash generation for uploaded evidence captures (MD5, SHA-1, SHA-256).
+- Detached SHA-256 integrity sidecars (`<report>.pdf.sha256`) generated automatically upon PDF export, containing `pdf_filename`, `sha256`, `generated_at_utc`, and a unique `report_id`.
+- Both in-dashboard UI verification and standalone CLI audit utility (`hash_verifier.py`) to confirm exported reports remain unaltered.
+- Chain-of-custody guarantee: reports never assert their own hashes internally, avoiding circular hash mutation.
 
-Generates cryptographic hashes for uploaded evidence:
+### 6. Dual-Format Forensic Reporting
+- **PDF Report Generation:** Professional multi-page forensic report built with ReportLab, featuring case metadata, evidence summaries, severity charts, threat alert breakdowns, and an accompanying detached `.sha256` integrity sidecar.
+- **Markdown Report Generation:** Structured report export for documentation and integration with case management tools.
 
-- MD5
-- SHA1
-- SHA256
+### 7. Interactive SOC-Themed Dashboard
+- Modern SOC dashboard with seamless Dark (`#0B1120`) and Light (`#F4F7FB`) theme toggles.
+- Glassmorphism overview metric cards with readable typography and live calculations.
+- Semantic HTML data tables with sticky headers and scrollable containers.
+- Plotly charts with unified cyan/blue palettes and custom themed tooltips.
+- Host communication topology graph powered by NetworkX and Plotly.
+- Second-by-second packet rate (PPS) and bandwidth consumption timeline charts.
 
-These hashes help verify the integrity of the original capture during forensic investigations.
-
----
-
-### Interactive Dashboard
-
-The Streamlit dashboard includes:
-
-- 📊 Packet Statistics
-- 📈 Protocol Distribution Charts
-- 🌐 Network Communication Graph
-- 🕒 Traffic Timeline
-- 📡 Top Source IPs
-- 📡 Top Destination IPs
-- 🔍 Packet Viewer
-- 🚨 Threat Detection Results
-- 🛡 IOC Extraction
-- 📄 Investigation Report
-
----
-
-### Report Generation
-
-Automatically generates a structured forensic report containing:
-
-- Capture Summary
-- Protocol Distribution
-- Threat Detection Results
-- IOC Summary
-- Alert Statistics
-
-Reports can be downloaded as Markdown for documentation or further conversion to PDF if required.
+### 8. Model Context Protocol (MCP) Server (Experimental)
+- Experimental FastMCP server (`mcp_server/server.py`) designed to allow AI assistants (such as Claude Desktop) to invoke PCAP parsing, statistics, IOC extraction, and threat detectors over stdio.
+- *Compatibility note:* Implemented with the FastMCP v1 SDK; requires `pip install 'mcp<2'` (incompatible with `mcp>=2.0` installed in the current environment without pinning).
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```
 pcap-analyzer/
+├── app.py                         # Streamlit forensic dashboard entry point
+├── main.py                        # Command-line interface (CLI) entry point
+├── config.py                      # Application configuration & feature flags
+├── models.py                      # PacketRecord and alert dataclass definitions
+├── pcap_parser.py                 # PCAP/PCAPNG packet parser (Scapy)
+├── calculate_statistics.py        # Traffic metrics, talkers, conversations
+├── communication_graph.py         # Network communication graph (NetworkX + Plotly)
+├── hashing.py                     # Cryptographic hashing (MD5, SHA-1, SHA-256)
+├── hash_verifier.py               # Evidence integrity validation utilities
+├── ioc_extractor.py               # IOC extraction (IPs, domains, URLs)
+├── password_detector.py           # Cleartext credential exposure & triage
+├── credential_utils.py            # Basic auth decoding, JWT recognition, triage dicts
+├── report_generator.py            # Structured Markdown forensic report generator
+├── pdf_report.py                  # Professional PDF report export (ReportLab)
+├── report_integrity.py            # Cryptographic sidecars & tamper verification
+├── performance.py                 # In-memory caching & profiling layer
+├── accelerated.py                 # Accelerated parser & graph builder
+├── design_system.py               # Design tokens, CSS variables & dark theme
+├── ui_styles.py                   # Light theme tokens & CSS variables
+├── theme_manager.py               # Theme switcher and CSS injector
+├── ui_components.py               # Reusable UI cards, tables, banners
 │
-├── app.py                         # Streamlit dashboard
-├── main.py                        # CLI interface
-├── models.py                      # PacketRecord data model
-├── pcap_parser.py                 # PCAP parser using Scapy
-├── calculate_statistics.py        # Packet statistics
-├── communication_graph.py         # Network graph visualization
-├── hashing.py                     # Evidence hashing
-├── ioc_extractor.py               # IOC extraction
-├── report_generator.py            # Markdown report generation
+├── assets/
+│   └── theme.css                  # Enterprise SOC theme stylesheet
 │
 ├── detectors/
-│   ├── port_scan.py
-│   ├── beaconing.py
-│   ├── dns_tunneling.py
-│   └── plaintext_creds.py
+│   ├── __init__.py
+│   ├── port_scan.py               # Port scan detection module
+│   ├── beaconing.py               # C2 beaconing detection module
+│   ├── dns_tunneling.py           # DNS tunneling & entropy detection module
+│   └── plaintext_creds.py         # Insecure credentials detection module
 │
-├── visualization/
+├── mcp_server/
+│   ├── __init__.py
+│   ├── server.py                  # FastMCP server entry point (stdio)
+│   └── tools.py                   # MCP forensic tool handlers
 │
-├── tests/
-│   └── test_detectors.py
+├── rust/
+│   ├── Cargo.toml                 # Optional Rust acceleration package
+│   └── src/lib.rs                 # Native Rust packet parsing routines
+├── rust_bridge.py                 # Python ctypes / PyO3 bridge for Rust
 │
 ├── samples/
+│   ├── README.md                  # Sample data documentation
+│   └── generate_sample_pcap.py    # Synthetic PCAP test capture generator
 │
 ├── reports/
+│   └── .gitkeep                   # Target directory for generated reports
 │
-├── requirements.txt
-└── README.md
+├── screenshots/                   # Application demonstration screenshots
+│
+├── tests/
+│   ├── test_accelerated.py        # Acceleration & graph parity tests
+│   ├── test_dashboard_improvements.py # Parsing, hex view, & filter tests
+│   ├── test_detectors.py          # Threat detection module tests
+│   └── test_regressions.py        # Theme, card, table, & integrity regression tests
+│
+├── .gitignore                     # Git exclusion rules
+├── requirements.txt               # Python package dependencies
+└── README.md                      # Project documentation
 ```
 
 ---
 
-# Installation
+## Installation & Setup
 
-Clone the repository
+### Prerequisites
+- **Python 3.10+** installed on your system.
+- **Git** for version control.
 
-```bash
-git clone https://github.com/<your-username>/pcap-analyzer.git
+### Setup Instructions (Windows PowerShell)
 
-cd pcap-analyzer
-```
+1. **Clone the repository:**
+   ```powershell
+   git clone https://github.com/<your-username>/pcap-analyzer.git
+   cd pcap-analyzer
+   ```
 
-Create a virtual environment
+2. **Create and activate a virtual environment:**
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
 
-```bash
-python -m venv .venv
-```
-
-Activate it
-
-### Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-### Linux/macOS
-
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
+3. **Install dependencies:**
+   ```powershell
+   pip install -r requirements.txt
+   ```
 
 ---
 
-# Usage
+## Usage
 
-## Command Line Interface
+### 1. Launch the Streamlit Dashboard (Recommended)
 
-```bash
-python main.py samples/capture.pcap --report reports/report.md
+Start the interactive dashboard using:
+```powershell
+.\.venv\Scripts\python -m streamlit run app.py
 ```
-
----
-
-## Streamlit Dashboard
-
+Or, if your virtual environment is activated:
 ```bash
 streamlit run app.py
 ```
+The application will open automatically in your browser at `http://localhost:8501`.
 
-The application will open in your browser.
+### 2. Command-Line Interface (CLI)
 
-Upload any supported **.pcap** or **.pcapng** file to begin analysis.
+#### Automated Capture Triage (`main.py`)
 
----
+Run automated triage on a capture and optionally generate a Markdown report directly from the terminal without launching the web UI:
+```powershell
+# Run triage and export a Markdown report
+.\.venv\Scripts\python main.py samples/synthetic_investigation.pcap --report reports/investigation_report.md
 
-# Analysis Workflow
-
-1. Upload a PCAP/PCAPNG file.
-2. Parse network packets.
-3. Calculate packet statistics.
-4. Extract Indicators of Compromise.
-5. Execute threat detection modules.
-6. Visualize traffic patterns.
-7. Generate investigation report.
-8. Download forensic report.
-
----
-
-# Threat Detection Modules
-
-| Detector | Description |
-|-----------|-------------|
-| Port Scan | Detects rapid connections to multiple destination ports |
-| Beaconing | Detects periodic communication indicating possible C2 traffic |
-| DNS Tunneling | Detects abnormal DNS behaviour |
-| Plaintext Credentials | Detects credentials transmitted without encryption |
-
----
-
-# Dashboard Modules
-
-- Dashboard Overview
-- Packet Statistics
-- Protocol Distribution
-- Source IP Analysis
-- Destination IP Analysis
-- Threat Detection
-- IOC Extraction
-- Packet Viewer
-- Network Communication Graph
-- Timeline Visualization
-- Investigation Report
-
----
-
-# Testing
-
-Run unit tests
-
-```bash
-pytest tests/ -v
+# Run triage and print summary alert table to console
+.\.venv\Scripts\python main.py samples/synthetic_investigation.pcap
 ```
 
-Real-world captures can be obtained from
+#### Forensic Report Integrity Verification (`hash_verifier.py`)
 
-https://www.malware-traffic-analysis.net/
+Verify an exported PDF forensic report against its detached `.sha256` sidecar file from the command line:
+```powershell
+# Verify PDF with explicit sidecar path
+.\.venv\Scripts\python hash_verifier.py pcap_forensic_report.pdf pcap_forensic_report.pdf.sha256
 
----
-
-# Screenshots
-
-Screenshots of:
--Pcap Analyzer
-![Pcapforensicsanalyzer](screenshots/pcap_forensicsanalyzer.png)
-
--Password Credenrials
-![password](screenshots/password.png)
-
-- Dashboard
-![Dashboard](screenshots/dashboard.png)
-
--Evience Integrity
-![Integrity](screenshots/integrity.png)
-
--Packet Viewer
-![packet](screenshot/packet_viewer.png)
-
-- Statistics
-![statistics](screenshots/traffic_stats.png)
-
-- Threat Detection
-![threat](screenshots/threat_detection.png)
-
-- IOC Extraction
-![ioc](screenshots/ioc.png)
-
-- Network Graph
-![network](screenshots/network_graph.png)
-
-- Timeline
-![timeline](screenshots/network_timeline.png)
-
-- Investigation Report
-![report](screenshots/summary_report.png)
-
--Pdf Generation
-![pdf_generation](screenshots/pdf_generation.png)
-
+# Verify PDF with automatic sidecar resolution (looks for <filename>.sha256 alongside the PDF)
+.\.venv\Scripts\python hash_verifier.py pcap_forensic_report.pdf
+```
 
 ---
 
-# Future Enhancements
+### 3. Model Context Protocol (MCP) Server (Experimental)
 
-Potential improvements include:
+> [!WARNING]
+> **Optional Dependency Compatibility Notice:**
+> The experimental MCP server (`mcp_server/server.py`) was developed against the Model Context Protocol SDK v1 interface (`from mcp.server.fastmcp import FastMCP`).
+> In the project's current virtual environment, `mcp>=2` is installed (`mcp==2.3.0`), where FastMCP was renamed to `MCPServer`, raising:
+> ```text
+> ModuleNotFoundError: No module named 'mcp.server.fastmcp'
+> ```
+> To run the experimental MCP server, pin or downgrade to FastMCP v1:
+> ```powershell
+> pip install "mcp<2"
+> ```
+> Application features, test suites, and Streamlit dashboards do not depend on the MCP server and run completely independently.
 
-- PDF report generation
-- Live packet capture support
-- Geo-IP visualization
-- VirusTotal integration
-- AbuseIPDB enrichment
-- Machine Learning based anomaly detection
-- Additional detectors
-  - ARP Spoofing
-  - DHCP Rogue Detection
-  - Data Exfiltration Detection
+Once FastMCP v1 is installed (`pip install "mcp<2"`), you can start the server via stdio:
+```powershell
+.\.venv\Scripts\python -m mcp_server.server
+```
+
+Add the following to your `claude_desktop_config.json` to integrate with Claude Desktop:
+```json
+{
+  "mcpServers": {
+    "pcap-analyzer": {
+      "command": "C:\\Users\\<User>\\...\\pcap-analyzer\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "C:\\Users\\<User>\\...\\pcap-analyzer"
+    }
+  }
+}
+```
 
 ---
 
-# AI-Assisted Development
+## Synthetic Test Capture
 
-This project was developed with the assistance of multiple AI coding assistants. Each tool was used for different stages of development and verification.
+The project includes an automated synthetic capture generator (`samples/generate_sample_pcap.py`) that synthesizes benign web traffic alongside five threat scenarios:
+- Benign DNS, HTTP, and TLS handshakes
+- SYN Port Scan (16 ports)
+- Periodic C2 Beaconing (5.0s intervals)
+- High-Entropy DNS Tunneling
+- Plaintext HTTP POST form and FTP authentication credentials
 
-### ChatGPT
-- Project planning and architecture guidance
-- Debugging and resolving implementation issues
-- Streamlit dashboard development
-- Network graph integration
-- Report generation improvements
-- Documentation and README preparation
+### Regenerating the Test Capture
 
-### Claude
-- Multi-file code reasoning
-- Detector logic refinement
-- Code structure suggestions
-- Architecture and implementation recommendations
+To generate or refresh the synthetic test capture:
+```powershell
+.\.venv\Scripts\python samples/generate_sample_pcap.py
+```
+This generates `samples/synthetic_investigation.pcap` (103 packets, ~12 KB), which is used by the test suite for automated end-to-end testing.
 
-### Google Gemini
-- Alternative implementation ideas
-- Cross-verification of approaches
-- Debugging assistance and explanation of concepts
+> [!IMPORTANT]
+> All IP addresses in the synthetic capture use RFC 5737 documentation ranges (`198.51.100.0/24`, `203.0.113.0/24`) and RFC 1918 private ranges (`192.168.1.0/24`, `10.0.0.0/8`). No real, proprietary, or private network traffic is included.
+
+---
+
+## Running Tests
+
+The test suite covers threat detectors, data models, report integrity, acceleration parity, and UI component rendering.
+
+To execute the full test suite:
+```powershell
+.\.venv\Scripts\python -m pytest
+```
+
+> [!NOTE]
+> If running tests on a clean clone where `samples/synthetic_investigation.pcap` is not present, regenerate it first using `.\.venv\Scripts\python samples/generate_sample_pcap.py`.
+
+### Latest Test Suite Status
+All **50 unit and regression tests** pass:
+```text
+============================= 50 passed in 12.78s =============================
+```
+
+---
+
+## Security & Privacy Guidelines
+
+When using this application for forensic investigations:
+
+1. **Never commit real evidence:** Real-world PCAP/PCAPNG captures, memory dumps, and confidential network data must never be committed to Git or pushed to public repositories.
+2. **Repository ignore rules:** The repository's [`.gitignore`](.gitignore) is hardened to automatically exclude `*.pcap`, `*.pcapng`, `*.cap`, `*.dmp`, `evidence/`, `captures/`, `.env`, private keys (`*.key`, `*.pem`), and generated investigation exports (`reports/*.pdf`, `reports/*.sha256`, `credential_findings.csv`, `external_ips.csv`).
+3. **Git ignore scope:** Remember that `.gitignore` only prevents untracked files from being staged; it cannot un-track files that were already committed. Always inspect `git status` before committing.
+4. **Public demonstrations:** For demonstrations, screenshots, and evaluations, always use synthetic captures generated via `samples/generate_sample_pcap.py`.
+
+---
+
+## Screenshots
+
+Screenshots of the application:
+
+- **Dashboard Overview**
+  ![Dashboard](screenshots/dashboard.png)
+
+- **PCAP Forensic Analyzer Main View**
+  ![Pcapforensicsanalyzer](screenshots/pcap_forensicanalyzer.png)
+
+- **Traffic Statistics**
+  ![statistics](screenshots/traffic_stats.png)
+
+- **Threat Detection**
+  ![threat](screenshots/threat_detection.png)
+
+- **Credential & Password Triage**
+  ![password](screenshots/password.png)
+
+- **IOC Extraction**
+  ![ioc](screenshots/ioc.png)
+
+- **Packet Viewer**
+  ![packet](screenshots/packet_viewer.png)
+
+- **Evidence Integrity Verification**
+  ![Integrity](screenshots/integrity.png)
+
+- **Network Communication Graph**
+  ![network](screenshots/network_graph.png)
+
+- **Traffic Timeline**
+  ![timeline](screenshots/network_timeline.png)
+
+- **Investigation Report View**
+  ![report](screenshots/summary_report.png)
+
+- **PDF Report Generation**
+  ![pdf_generation](screenshots/pdf_generation.png)
+
+---
+
+## Future Enhancements (Planned)
+
+- Live packet capture via Npcap / libpcap sockets
+- Geo-IP visualization and mapping of external hosts
+- Threat intelligence API enrichment (VirusTotal, AbuseIPDB)
+- Machine Learning based traffic anomaly detection
+- Additional protocol detectors:
+  - ARP Spoofing / Poisoning
+  - Rogue DHCP Detection
+  - Encrypted SNI / JA3 fingerprinting
+
+---
+
+## AI-Assisted Development
+
+This project was developed with the assistance of multiple AI coding assistants. Each tool was used for different stages of development and verification:
+
+- **ChatGPT:** Project planning, architecture guidance, Streamlit dashboard development, and report generation improvements.
+- **Claude:** Multi-file code reasoning, detector logic refinement, and architecture recommendations.
+- **Google Gemini / Antigravity:** UI theming refinement, bug fixing, test suite expansion, security auditing, and repository hardening.
 
 > AI-generated suggestions were reviewed, tested, and integrated manually. All functionality was validated through testing with multiple PCAP files before finalizing the project.
 
 ---
 
-# Contributing
+## Contributing
 
-Contributions are welcome.
-
-Possible contribution areas include:
-
-- New detection modules
-- Additional visualization dashboards
-- Performance optimization
-- Improved forensic reporting
-- Unit testing
+Contributions are welcome. Areas for enhancement include:
+- New rule-based detection modules in `detectors/`
+- Performance optimizations and additional protocol decoders
+- New forensic visualizations and export formats
+- Additional unit and integration test fixtures
 
 ---
 
-# License
+## License
 
-This project was developed for academic and educational purposes.
+This project was developed for academic, educational, and authorized digital forensics research purposes.
 
 ---
 
-# Author
+## Authors
 
-**Anshika Tripathi**
-
-Bachelor of Technology (Computer Science & Engineering)- 3rd year
-
+**Anshika Tripathi**<br>
+Bachelor of Technology (Computer Science & Engineering) - 3rd year<br>
 ITM, GIDA, Gorakhpur; affiliated to Dr. A.P.J. Abdul Kalam Technical University, Lucknow
 
-**Jiya Gupta**
-
-Bachelor of Technology (Computer Science & Engineering)- 4th year
-
+**Jiya Gupta**<br>
+Bachelor of Technology (Computer Science & Engineering) - 4th year<br>
 Birla Institute of Technology, Mesra, Ranchi
-
 
 ---
 
-# Acknowledgements
+## Acknowledgements
 
-- Scapy
-- Streamlit
-- Plotly
-- NetworkX
-- Pandas
-- Wireshark
-- Malware Traffic Analysis
+- [Scapy](https://scapy.net/)
+- [Streamlit](https://streamlit.io/)
+- [Plotly](https://plotly.com/)
+- [NetworkX](https://networkx.org/)
+- [Pandas](https://pandas.pydata.org/)
+- [ReportLab](https://www.reportlab.com/)
+- [Wireshark](https://www.wireshark.org/)
+- [Malware Traffic Analysis](https://www.malware-traffic-analysis.net/)

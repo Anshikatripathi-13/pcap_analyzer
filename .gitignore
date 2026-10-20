@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.coverage
+htmlcov/
+.cache/
 
 # Virtual environments
 .venv/
@@ -10,15 +13,36 @@ venv/
 env/
 ENV/
 
-# Large or sensitive capture files
+# Environment variables, keys, and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+
+# Large or sensitive capture files (Private PCAP evidence)
 *.pcap
 *.pcapng
+*.cap
+*.dmp
+*.etl
+evidence/
+captures/
 !samples/README.md
+!samples/synthetic_investigation.pcap
 
-# Generated reports in reports folder
+# Generated reports and forensic exports
 reports/*.md
 reports/*.pdf
+reports/*.sha256
+reports/*.json
 !reports/.gitkeep
+credential_findings.csv
+external_ips.csv
 
 # Rust and Python build artifacts
 rust/target/
@@ -34,3 +58,8 @@ dist/
 .DS_Store
 Thumbs.db
 *.tmp
+*~
+.vscode/
+.idea/
+*.swp
+*.swo

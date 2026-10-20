@@ -68,7 +68,7 @@ def create_graph_figure(records):
 
         line=dict(
             width=1,
-            color="#888",
+            color="rgba(148, 163, 184, 0.35)",
         ),
     )
 
@@ -114,7 +114,7 @@ def create_graph_figure(records):
 
             color=node_size,
 
-            colorscale="Turbo",
+            colorscale="Viridis",
 
             line=dict(width=2),
 

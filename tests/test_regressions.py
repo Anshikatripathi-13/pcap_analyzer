@@ -527,3 +527,97 @@ def test_plotly_theme_templates():
     styled = style_plotly_figure(fig)
     assert styled is not None
 
+    # Hoverlabel must be configured for legible tooltips in both themes
+    assert "hoverlabel" in dark_tpl["layout"]
+    assert "hoverlabel" in light_tpl["layout"]
+    assert dark_tpl["layout"]["hoverlabel"]["bgcolor"] == "#141D2E"
+    assert light_tpl["layout"]["hoverlabel"]["bgcolor"] == "#FFFFFF"
+
+    # Colorway should use the coordinated blue/cyan cybersecurity palette
+    assert dark_tpl["layout"]["colorway"][0] == "#06b6d4"
+    assert light_tpl["layout"]["colorway"][0] == "#0284c7"
+
+
+# ===========================================================================
+# 6. REGRESSION TESTS: Bug 6 — Table Themes, Uploader & Visual Consistency
+# ===========================================================================
+
+def test_table_theme_tokens_and_variables():
+    """Verifies table header background variables are defined for both themes."""
+    from design_system import COLORS, css_variables_block
+    from ui_styles import LIGHT_COLORS, light_css_variables_block
+
+    assert COLORS.table_header_bg.upper() == "#1A2438"
+    assert LIGHT_COLORS.table_header_bg.upper() == "#F8FAFC"
+
+    dark_css = css_variables_block()
+    light_css = light_css_variables_block()
+
+    assert "--table-header-bg: #1A2438" in dark_css
+    assert "--table-header-bg: #F8FAFC" in light_css
+
+
+def test_render_data_table_escapes_content_and_structures_html(monkeypatch):
+    """
+    Verifies that render_data_table generates accessible HTML table markup,
+    wraps it in .soc-table-container, and safely escapes unsafe characters.
+    """
+    import pandas as pd
+    from ui_components import render_data_table
+
+    captured = []
+
+    def mock_markdown(content, unsafe_allow_html=False):
+        captured.append((content, unsafe_allow_html))
+
+    monkeypatch.setattr("streamlit.markdown", mock_markdown)
+
+    # 1. Valid data
+    df = pd.DataFrame([
+        {"Protocol": "<script>alert('xss')</script>", "Packets": 42, "Bytes": 1024}
+    ])
+    render_data_table(df)
+
+    assert len(captured) == 1
+    html_content, allow_html = captured[0]
+    assert allow_html is True
+    assert '<div class="soc-table-container"' in html_content
+    assert '<table class="dataframe soc-table">' in html_content
+    # XSS content must be escaped
+    assert "<script>" not in html_content
+    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html_content
+    assert "42" in html_content
+
+    # 2. List of dicts input
+    captured.clear()
+    render_data_table([{"Host": "192.168.1.1", "Alerts": 3}])
+    assert len(captured) == 1
+    assert "192.168.1.1" in captured[0][0]
+
+    # 3. None and empty input do not crash
+    info_captured = []
+    monkeypatch.setattr("streamlit.info", lambda msg: info_captured.append(msg))
+    render_data_table(None)
+    render_data_table([])
+    render_data_table(pd.DataFrame())
+    assert len(info_captured) == 3
+
+
+def test_theme_css_uploader_and_table_rules():
+    """Verifies assets/theme.css contains refined rules for uploader and tables."""
+    theme_css_path = Path(__file__).parent.parent / "assets" / "theme.css"
+    content = theme_css_path.read_text(encoding="utf-8")
+
+    # File uploader dropzone and browse button
+    assert '[data-testid="stFileUploaderDropzone"]' in content
+    assert '[data-testid="stFileUploaderDropzone"] button' in content
+    assert "var(--bg-surface)" in content
+    assert "var(--accent-solid)" in content
+
+    # SOC data tables
+    assert ".soc-table-container" in content
+    assert ".soc-table" in content
+    assert "var(--table-header-bg)" in content
+    assert 'div[data-testid="stTable"]' in content
+
+

@@ -340,23 +340,164 @@ div[data-testid="stCheckbox"] label {
     transform: translateY(-1px);
 }
 
-div[data-testid="stFileUploaderDropzone"] {
-    background: var(--bg-surface) !important;
+/* ---- File Uploader ---- */
+div[data-testid="stFileUploader"] {
+    background: transparent !important;
+}
+
+[data-testid="stFileUploaderDropzone"] {
+    background-color: var(--bg-surface) !important;
     border: 1.5px dashed var(--border-color) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: var(--card-shadow);
+    padding: 1.5rem 1.75rem !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-div[data-testid="stFileUploaderDropzone"]:hover {
+[data-testid="stFileUploaderDropzone"]:hover,
+[data-testid="stFileUploaderDropzone"]:focus-within {
     border-color: var(--accent-solid) !important;
+    background-color: var(--bg-surface-hover) !important;
 }
 
-div[data-testid="stFileUploaderDropzone"] section {
+[data-testid="stFileUploaderDropzone"] > div,
+[data-testid="stFileUploaderDropzone"] section {
+    background: transparent !important;
     color: var(--text-secondary) !important;
 }
 
-div[data-testid="stFileUploaderDropzone"] [data-testid="stFileUploaderInstructions"] {
+[data-testid="stFileUploaderDropzoneInstructions"],
+[data-testid="stFileUploaderDropzoneInstructions"] span,
+[data-testid="stFileUploaderDropzoneInstructions"] small {
     color: var(--text-muted) !important;
+}
+
+/* Browse files button inside uploader dropzone */
+[data-testid="stFileUploaderDropzone"] button,
+[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"] {
+    background: var(--bg-surface-hover) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500 !important;
+    padding: 0.45rem 1.1rem !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+[data-testid="stFileUploaderDropzone"] button:hover,
+[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"]:hover {
+    border-color: var(--accent-solid) !important;
+    color: var(--accent-solid) !important;
+    background: var(--bg-surface) !important;
+}
+
+/* Uploaded file list items */
+[data-testid="stFileUploaderFile"] {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-primary) !important;
+}
+
+/* ---- Semantic SOC data tables ---- */
+.soc-table-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--card-shadow);
+    overflow-x: auto;
+    margin-bottom: var(--gap-md);
+    width: 100%;
+}
+
+.soc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-family);
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    text-align: left;
+    border: none;
+}
+
+.soc-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.soc-table th {
+    background-color: var(--table-header-bg);
+    color: var(--text-muted) !important;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.75rem 1rem;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.soc-table td {
+    padding: 0.7rem 1rem;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    transition: background-color 0.12s ease;
+    white-space: nowrap;
+}
+
+.soc-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.soc-table tbody tr:hover td {
+    background-color: var(--bg-surface-hover);
+}
+
+/* Streamlit native table & dataframe styling */
+div[data-testid="stTable"] {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--card-shadow) !important;
+    overflow-x: auto;
+}
+
+div[data-testid="stTable"] table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-family);
+    color: var(--text-primary) !important;
+}
+
+div[data-testid="stTable"] th {
+    background: var(--table-header-bg) !important;
+    color: var(--text-muted) !important;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+div[data-testid="stTable"] td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+div[data-testid="stTable"] tr:hover td {
+    background: var(--bg-surface-hover) !important;
 }
 
 div[data-testid="stDataFrame"] {

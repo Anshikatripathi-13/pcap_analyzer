@@ -20,6 +20,7 @@ LIGHT_COLORS = ColorTokens(
     bg_secondary="#FFFFFF",    # Clean solid white
     bg_surface="#FFFFFF",      # Solid white cards and panels (NOT translucent!)
     bg_surface_hover="#F8FAFC",
+    table_header_bg="#F8FAFC",
     border="#E2E8F0",          # Subtle gray border as requested
     border_hover="#CBD5E1",
 
@@ -99,6 +100,7 @@ def light_css_variables_block() -> str:
         --bg-secondary: {c.bg_secondary};
         --bg-surface: {c.bg_surface};
         --bg-surface-hover: {c.bg_surface_hover};
+        --table-header-bg: {c.table_header_bg};
         --border-color: {c.border};
         --border-hover: {c.border_hover};
 
@@ -187,28 +189,50 @@ def light_css_variables_block() -> str:
 
 
 def plotly_light_template() -> dict:
-    """Plotly layout template dict matching the light SOC theme."""
+    """
+    Plotly layout template dict matching the light SOC theme.
+    Uses a coordinated, restrained blue/cyan palette.
+    """
     c = LIGHT_COLORS
     return {
         "layout": {
             "paper_bgcolor": "rgba(0,0,0,0)",
             "plot_bgcolor": "rgba(0,0,0,0)",
-            "font": {"family": TYPOGRAPHY.font_family, "color": c.text_primary},
-            "title": {"font": {"size": 16, "color": c.text_primary}},
-            "legend": {"font": {"color": c.text_secondary}},
+            "font": {"family": TYPOGRAPHY.font_family, "color": c.text_primary, "size": 12},
+            "title": {"font": {"family": TYPOGRAPHY.font_family, "size": 15, "color": c.text_primary}},
+            "legend": {"font": {"family": TYPOGRAPHY.font_family, "color": c.text_secondary, "size": 11}},
             "xaxis": {
-                "gridcolor": "rgba(148, 163, 184, 0.2)",
+                "gridcolor": "rgba(148, 163, 184, 0.18)",
                 "linecolor": c.border,
                 "color": c.text_secondary,
+                "tickfont": {"family": TYPOGRAPHY.font_family, "color": c.text_secondary, "size": 11},
+                "title": {"font": {"family": TYPOGRAPHY.font_family, "color": c.text_secondary, "size": 12}},
+                "zerolinecolor": "rgba(148, 163, 184, 0.2)",
             },
             "yaxis": {
-                "gridcolor": "rgba(148, 163, 184, 0.2)",
+                "gridcolor": "rgba(148, 163, 184, 0.18)",
                 "linecolor": c.border,
                 "color": c.text_secondary,
+                "tickfont": {"family": TYPOGRAPHY.font_family, "color": c.text_secondary, "size": 11},
+                "title": {"font": {"family": TYPOGRAPHY.font_family, "color": c.text_secondary, "size": 12}},
+                "zerolinecolor": "rgba(148, 163, 184, 0.2)",
+            },
+            "hoverlabel": {
+                "bgcolor": c.bg_surface,
+                "bordercolor": c.border,
+                "font": {"family": TYPOGRAPHY.font_family, "color": c.text_primary, "size": 12},
             },
             "colorway": [
-                c.accent_solid, c.accent_end, c.severity_high,
-                c.severity_medium, c.severity_ok, c.severity_critical,
+                "#0284c7",  # Sky-600
+                "#2563eb",  # Blue-600
+                "#4f46e5",  # Indigo-600
+                "#0369a1",  # Sky-700
+                "#0d9488",  # Teal-600
+                "#7c3aed",  # Violet-600
+                "#0ea5e9",  # Sky-500
+                "#1d4ed8",  # Blue-700
+                "#4338ca",  # Indigo-700
+                "#0f766e",  # Teal-700
             ],
         }
     }

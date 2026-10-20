@@ -39,6 +39,7 @@ from performance import (
 from pcap_parser import format_hex_ascii
 from ui_components import (
     render_case_banner,
+    render_data_table,
     render_footer,
     render_hero_banner,
     render_metric_card,
@@ -358,29 +359,20 @@ if uploaded is not None:
                         use_container_width=True,
                     )
                     st.caption("Protocol Distribution & Byte Volumes")
-                    st.dataframe(
-                        pd.DataFrame(proto_dist),
-                        use_container_width=True,
-                    )
+                    render_data_table(proto_dist)
 
                 with right:
                     st.subheader("Top Conversations")
                     top_convs = calculate_top_conversations(active_records, top_n=10)
                     if top_convs:
-                        st.dataframe(
-                            pd.DataFrame(top_convs),
-                            use_container_width=True,
-                        )
+                        render_data_table(top_convs)
                     else:
                         st.info("No host conversations identified.")
 
                     st.subheader("Top Talkers")
                     top_talkers = calculate_top_talkers(active_records, top_n=10)
                     if top_talkers:
-                        st.dataframe(
-                            pd.DataFrame(top_talkers),
-                            use_container_width=True,
-                        )
+                        render_data_table(top_talkers)
                     else:
                         st.info("No endpoint host traffic identified.")
 
@@ -501,18 +493,15 @@ if uploaded is not None:
 
             if port_scan_alerts:
 
-                st.dataframe(
-                    pd.DataFrame([
-                        {
-                            "Severity": a.severity,
-                            "Source IP": a.src_ip,
-                            "Distinct Ports": a.distinct_ports,
-                            "Targets": len(a.dst_ips),
-                        }
-                        for a in port_scan_alerts
-                    ]),
-                    use_container_width=True,
-                )
+                render_data_table([
+                    {
+                        "Severity": a.severity,
+                        "Source IP": a.src_ip,
+                        "Distinct Ports": a.distinct_ports,
+                        "Targets": len(a.dst_ips),
+                    }
+                    for a in port_scan_alerts
+                ])
 
             else:
                 st.success("No Port Scan activity detected.")
@@ -523,22 +512,19 @@ if uploaded is not None:
 
             if beacon_alerts:
 
-                st.dataframe(
-                    pd.DataFrame([
-                        {
-                            "Severity": a.severity,
-                            "Source": a.src_ip,
-                            "Destination": a.dst_ip,
-                            "Connections": a.connection_count,
-                            "Avg Interval (s)": round(
-                                a.avg_interval_seconds,
-                                2,
-                            ),
-                        }
-                        for a in beacon_alerts
-                    ]),
-                    use_container_width=True,
-                )
+                render_data_table([
+                    {
+                        "Severity": a.severity,
+                        "Source": a.src_ip,
+                        "Destination": a.dst_ip,
+                        "Connections": a.connection_count,
+                        "Avg Interval (s)": round(
+                            a.avg_interval_seconds,
+                            2,
+                        ),
+                    }
+                    for a in beacon_alerts
+                ])
 
             else:
                 st.success("No Beaconing detected.")
@@ -549,21 +535,18 @@ if uploaded is not None:
 
             if dns_alerts:
 
-                st.dataframe(
-                    pd.DataFrame([
-                        {
-                            "Severity": a.severity,
-                            "Root Domain": a.root_domain,
-                            "Queries": a.query_count,
-                            "Entropy": round(
-                                a.avg_entropy,
-                                2,
-                            ),
-                        }
-                        for a in dns_alerts
-                    ]),
-                    use_container_width=True,
-                )
+                render_data_table([
+                    {
+                        "Severity": a.severity,
+                        "Root Domain": a.root_domain,
+                        "Queries": a.query_count,
+                        "Entropy": round(
+                            a.avg_entropy,
+                            2,
+                        ),
+                    }
+                    for a in dns_alerts
+                ])
 
             else:
                 st.success("No DNS Tunneling detected.")
@@ -574,19 +557,16 @@ if uploaded is not None:
 
             if cred_alerts:
 
-                st.dataframe(
-                    pd.DataFrame([
-                        {
-                            "Severity": a.severity,
-                            "Type": a.kind,
-                            "Source": a.src_ip,
-                            "Destination": a.dst_ip,
-                            "Matched": a.matched_text,
-                        }
-                        for a in cred_alerts
-                    ]),
-                    use_container_width=True,
-                )
+                render_data_table([
+                    {
+                        "Severity": a.severity,
+                        "Type": a.kind,
+                        "Source": a.src_ip,
+                        "Destination": a.dst_ip,
+                        "Matched": a.matched_text,
+                    }
+                    for a in cred_alerts
+                ])
 
             else:
                 st.success("No Plaintext Credentials detected.")
@@ -641,10 +621,9 @@ if uploaded is not None:
                 filtered_df = filtered_df.copy()
                 filtered_df["Value"] = "••••••••"
 
-            st.dataframe(
+            render_data_table(
                 filtered_df.sort_values("Severity"),
-                use_container_width=True,
-                height=420,
+                max_height=420,
             )
 
             st.download_button(
@@ -660,18 +639,12 @@ if uploaded is not None:
             ]
             if weak_default:
                 with st.expander(f"Weak / Default Passwords ({len(weak_default)})"):
-                    st.dataframe(
-                        pd.DataFrame(findings_to_dicts(weak_default)),
-                        use_container_width=True,
-                    )
+                    render_data_table(findings_to_dicts(weak_default))
 
             reused = [f for f in credential_findings if f.reused]
             if reused:
                 with st.expander(f"Reused Credentials ({len(reused)})"):
-                    st.dataframe(
-                        pd.DataFrame(findings_to_dicts(reused)),
-                        use_container_width=True,
-                    )
+                    render_data_table(findings_to_dicts(reused))
 
         else:
             st.success("No credentials or secrets detected in this capture.")
@@ -822,10 +795,9 @@ if uploaded is not None:
                     })
 
                 packet_df = pd.DataFrame(table_rows)
-                st.dataframe(
+                render_data_table(
                     packet_df,
-                    use_container_width=True,
-                    height=360,
+                    max_height=360,
                 )
 
                 st.divider()

@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import html
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
+
+import pandas as pd
 import streamlit as st
 
 from design_system import SEVERITY_COLOR_MAP, css_variables_block, plotly_dark_template
@@ -136,6 +138,45 @@ def render_section_header(icon: str, title: str, caption: Optional[str] = None) 
     st.markdown(f"### {icon} {title}")
     if caption:
         st.caption(caption)
+
+
+def render_data_table(
+    data: pd.DataFrame | list[dict] | None,
+    max_height: Optional[int | str] = None,
+    use_container_width: bool = True,
+) -> None:
+    """
+    Renders a Pandas DataFrame or list of dicts as an accessible, themed SOC HTML table.
+    Works seamlessly under both dark and light modes by using semantic
+    HTML (div.soc-table-container > table.soc-table) and CSS variables.
+    User-uploaded strings are safely escaped via escape=True.
+    """
+    if data is None:
+        st.info("No data available.")
+        return
+
+    if isinstance(data, list):
+        if not data:
+            st.info("No data available.")
+            return
+        df = pd.DataFrame(data)
+    elif isinstance(data, pd.DataFrame):
+        df = data
+    else:
+        df = pd.DataFrame(data)
+
+    if df.empty:
+        st.info("No data available.")
+        return
+
+    height_style = ""
+    if max_height:
+        h = f"{max_height}px" if isinstance(max_height, int) else str(max_height)
+        height_style = f"max-height: {h}; overflow-y: auto;"
+
+    table_html = df.to_html(classes="soc-table", index=False, escape=True, border=0)
+    container_html = f'<div class="soc-table-container" style="{height_style}">{table_html}</div>'
+    st.markdown(container_html, unsafe_allow_html=True)
 
 
 def style_plotly_figure(fig):

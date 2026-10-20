@@ -19,6 +19,7 @@ class ColorTokens:
     bg_secondary: str = "#141D2E"
     bg_surface: str = "#141D2E"
     bg_surface_hover: str = "#1A2438"
+    table_header_bg: str = "#1A2438"
     border: str = "rgba(148, 163, 184, 0.14)"
     border_hover: str = "rgba(148, 163, 184, 0.28)"
 
@@ -144,6 +145,7 @@ def css_variables_block() -> str:
         --bg-secondary: {c.bg_secondary};
         --bg-surface: {c.bg_surface};
         --bg-surface-hover: {c.bg_surface_hover};
+        --table-header-bg: {c.table_header_bg};
         --border-color: {c.border};
         --border-hover: {c.border_hover};
 
@@ -231,28 +233,47 @@ def plotly_dark_template() -> dict:
     A Plotly layout template dict matching the SOC theme, applied via
     fig.update_layout(template=...) to figures that already exist
     (charts.py, communication_graph.py, and the inline px calls in app.py).
-    No chart *data* logic is touched -- only layout/styling.
+    Uses a coordinated, restrained blue/cyan cybersecurity palette.
     """
     return {
         "layout": {
             "paper_bgcolor": "rgba(0,0,0,0)",
             "plot_bgcolor": "rgba(0,0,0,0)",
-            "font": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_primary},
-            "title": {"font": {"size": 16, "color": COLORS.text_primary}},
-            "legend": {"font": {"color": COLORS.text_secondary}},
+            "font": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_primary, "size": 12},
+            "title": {"font": {"family": TYPOGRAPHY.font_family, "size": 15, "color": COLORS.text_primary}},
+            "legend": {"font": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_secondary, "size": 11}},
             "xaxis": {
-                "gridcolor": "rgba(148, 163, 184, 0.12)",
+                "gridcolor": "rgba(148, 163, 184, 0.08)",
                 "linecolor": COLORS.border,
                 "color": COLORS.text_secondary,
+                "tickfont": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_secondary, "size": 11},
+                "title": {"font": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_secondary, "size": 12}},
+                "zerolinecolor": "rgba(148, 163, 184, 0.15)",
             },
             "yaxis": {
-                "gridcolor": "rgba(148, 163, 184, 0.12)",
+                "gridcolor": "rgba(148, 163, 184, 0.08)",
                 "linecolor": COLORS.border,
                 "color": COLORS.text_secondary,
+                "tickfont": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_secondary, "size": 11},
+                "title": {"font": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_secondary, "size": 12}},
+                "zerolinecolor": "rgba(148, 163, 184, 0.15)",
+            },
+            "hoverlabel": {
+                "bgcolor": COLORS.bg_secondary,
+                "bordercolor": COLORS.border,
+                "font": {"family": TYPOGRAPHY.font_family, "color": COLORS.text_primary, "size": 12},
             },
             "colorway": [
-                COLORS.accent_solid, COLORS.accent_end, COLORS.severity_high,
-                COLORS.severity_medium, COLORS.severity_ok, COLORS.severity_critical,
+                "#06b6d4",  # Cyan-500
+                "#3b82f6",  # Blue-500
+                "#6366f1",  # Indigo-500
+                "#0ea5e9",  # Sky-500
+                "#14b8a6",  # Teal-500
+                "#8b5cf6",  # Violet-500
+                "#38bdf8",  # Sky-400
+                "#0284c7",  # Sky-600
+                "#818cf8",  # Indigo-400
+                "#2dd4bf",  # Teal-400
             ],
         }
     }

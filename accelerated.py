@@ -123,7 +123,7 @@ def create_graph_figure_accelerated(records: list[PacketRecord]):
         x=edge_x, y=edge_y,
         mode="lines",
         hoverinfo="none",
-        line=dict(width=1, color="#888"),
+        line=dict(width=1, color="rgba(148, 163, 184, 0.35)"),
     )
 
     node_x, node_y, node_text, node_size = [], [], [], []
@@ -145,7 +145,7 @@ def create_graph_figure_accelerated(records: list[PacketRecord]):
         marker=dict(
             size=node_size,
             color=node_size,
-            colorscale="Turbo",
+            colorscale="Viridis",
             line=dict(width=2),
             showscale=True,
             colorbar=dict(title="Connections"),

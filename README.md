@@ -162,8 +162,8 @@ pcap-analyzer/
 
 1. **Clone the repository:**
    ```powershell
-   git clone https://github.com/<your-username>/pcap-analyzer.git
-   cd pcap-analyzer
+   git clone https://github.com/Anshikatripathi-13/pcap_analyzer.git
+   cd pcap_analyzer
    ```
 
 2. **Create and activate a virtual environment:**
@@ -289,9 +289,9 @@ To execute the full test suite:
 > If running tests on a clean clone where `samples/synthetic_investigation.pcap` is not present, regenerate it first using `.\.venv\Scripts\python samples/generate_sample_pcap.py`.
 
 ### Latest Test Suite Status
-All **50 unit and regression tests** pass:
+All **59 unit and regression tests** pass:
 ```text
-============================= 50 passed in 12.78s =============================
+============================= 59 passed in 15.59s =============================
 ```
 
 ---

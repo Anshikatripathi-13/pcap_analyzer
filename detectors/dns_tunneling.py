@@ -21,6 +21,45 @@ MIN_QUERIES_TO_DOMAIN = 20     # volume threshold
 MIN_AVG_SUBDOMAIN_LEN = 25     # chars
 MIN_ENTROPY = 3.5              # bits/char, typical English text is ~2.5-3.0
 
+# Curated set of prevalent multi-level country-code second-level domains (ccSLDs).
+# DESIGN & OPERATIONAL LIMITATIONS:
+#   This static list covers the most common global registry suffixes where the second
+#   level is not registrable by end users (e.g., .co.uk, .gov.in, .com.au, .co.jp).
+#   Limitations:
+#     1. Multi-part private suffixes (e.g. .s3.amazonaws.com, .github.io) and rare or
+#        newly registered ccSLDs outside this set fall back to the standard 2-label split.
+#     2. For full dynamic coverage of all global ICANN and private domains, an external
+#        library like python-tldextract (backed by the Mozilla Public Suffix List) would
+#        be required, which is avoided here to maintain a zero-external-dependency core.
+COMMON_TWO_LEVEL_TLDS: frozenset[str] = frozenset({
+    # United Kingdom
+    "co.uk", "org.uk", "gov.uk", "ac.uk", "net.uk", "mil.uk", "mod.uk", "police.uk", "nhs.uk",
+    # Australia
+    "com.au", "net.au", "org.au", "edu.au", "gov.au", "asn.au", "id.au",
+    # India
+    "co.in", "net.in", "org.in", "gen.in", "firm.in", "ind.in", "nic.in", "gov.in", "ac.in", "edu.in", "res.in",
+    # New Zealand
+    "co.nz", "net.nz", "org.nz", "govt.nz", "ac.nz", "edu.nz", "geek.nz", "school.nz",
+    # Japan
+    "co.jp", "ne.jp", "or.jp", "ac.jp", "go.jp", "ed.jp", "lg.jp",
+    # Brazil
+    "com.br", "net.br", "org.br", "gov.br", "edu.br", "mil.br", "art.br",
+    # South Africa
+    "co.za", "net.za", "org.za", "gov.za", "ac.za", "edu.za",
+    # Singapore
+    "com.sg", "net.sg", "org.sg", "gov.sg", "edu.sg", "per.sg",
+    # China
+    "com.cn", "net.cn", "org.cn", "gov.cn", "edu.cn",
+    # Canada
+    "gc.ca",
+    # Mexico
+    "com.mx", "org.mx", "gob.mx", "edu.mx", "net.mx",
+    # Israel
+    "co.il", "org.il", "gov.il", "ac.il", "muni.il",
+    # South Korea
+    "co.kr", "ne.kr", "or.kr", "go.kr", "ac.kr", "re.kr",
+})
+
 
 def _entropy(s: str) -> float:
     if not s:
@@ -33,8 +72,24 @@ def _entropy(s: str) -> float:
 
 
 def _root_domain(fqdn: str) -> str:
-    parts = fqdn.strip(".").split(".")
-    return ".".join(parts[-2:]) if len(parts) >= 2 else fqdn
+    """
+    Extracts the registrable root domain from an FQDN.
+    Handles standard single-part TLDs (e.g., example.com -> example.com)
+    and prevalent multi-level country-code second-level domains (ccSLDs)
+    (e.g., evil.co.uk -> evil.co.uk, portal.gov.in -> portal.gov.in).
+    """
+    if not fqdn:
+        return ""
+    clean = fqdn.strip().rstrip(".").lower()
+    parts = clean.split(".")
+    if len(parts) <= 2:
+        return clean
+
+    suffix = f"{parts[-2]}.{parts[-1]}"
+    if suffix in COMMON_TWO_LEVEL_TLDS:
+        return ".".join(parts[-3:])
+
+    return ".".join(parts[-2:])
 
 
 @dataclass
@@ -68,7 +123,7 @@ def detect_dns_tunneling(records: list[PacketRecord]) -> list[DNSTunnelAlert]:
 
         subdomains = []
         for q in queries:
-            prefix = q[: -len(root)].strip(".") if q.endswith(root) else q
+            prefix = q[: -len(root)].strip(".") if q.lower().endswith(root.lower()) else q
             subdomains.append(prefix)
 
         avg_len = sum(len(s) for s in subdomains) / len(subdomains)

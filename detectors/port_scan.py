@@ -32,12 +32,31 @@ class PortScanAlert:
                 f"across {len(self.dst_ips)} target(s).")
 
 
+def _is_tcp_syn_candidate(r: PacketRecord) -> bool:
+    """
+    Checks if a packet record qualifies as a TCP SYN scan probe candidate.
+    - Excludes non-TCP protocols (UDP, DNS, ICMP, ARP).
+    - When TCP flag metadata is available, strictly requires the SYN flag and
+      excludes packets with ACK (eliminating established sessions and server replies).
+    - When tcp_flags is None (e.g. synthetic test fixtures), gracefully allows
+      records with protocol TCP, HTTP, TLS/HTTPS, or default OTHER.
+    """
+    if not r.src_ip or r.dst_port is None:
+        return False
+    if r.protocol in ("UDP", "DNS", "ICMP", "ARP"):
+        return False
+    if r.tcp_flags is not None:
+        flags = r.tcp_flags.upper()
+        return ("S" in flags) and ("A" not in flags)
+    return r.protocol in ("TCP", "OTHER", "HTTP", "TLS/HTTPS")
+
+
 def detect_port_scans(
     records: list[PacketRecord],
     port_threshold: int = DEFAULT_PORT_THRESHOLD,
     window_seconds: int = DEFAULT_WINDOW_SECONDS,
 ) -> list[PortScanAlert]:
-    tcp_syn_like = [r for r in records if r.dst_port is not None and r.src_ip]
+    tcp_syn_like = [r for r in records if _is_tcp_syn_candidate(r)]
     tcp_syn_like.sort(key=lambda r: r.timestamp)
 
     alerts: list[PortScanAlert] = []

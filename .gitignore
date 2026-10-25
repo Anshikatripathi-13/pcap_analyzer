@@ -6,6 +6,9 @@ __pycache__/
 .coverage
 htmlcov/
 .cache/
+.mypy_cache/
+.ruff_cache/
+*.log
 
 # Virtual environments
 .venv/

@@ -56,7 +56,7 @@ def detect_dns_tunneling_accelerated(records: list[PacketRecord]) -> list[DNSTun
 
         subdomains = []
         for q in queries:
-            prefix = q[: -len(root)].strip(".") if q.endswith(root) else q
+            prefix = q[: -len(root)].strip(".") if q.lower().endswith(root.lower()) else q
             subdomains.append(prefix)
 
         avg_len = sum(len(s) for s in subdomains) / len(subdomains)

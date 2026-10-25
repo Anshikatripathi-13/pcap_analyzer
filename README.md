@@ -396,10 +396,6 @@ This project was developed for academic, educational, and authorized digital for
 Bachelor of Technology (Computer Science & Engineering) - 3rd year<br>
 ITM, GIDA, Gorakhpur; affiliated to Dr. A.P.J. Abdul Kalam Technical University, Lucknow
 
-**Jiya Gupta**<br>
-Bachelor of Technology (Computer Science & Engineering) - 4th year<br>
-Birla Institute of Technology, Mesra, Ranchi
-
 ---
 
 ## Acknowledgements

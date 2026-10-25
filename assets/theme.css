@@ -324,20 +324,108 @@ div[data-testid="stCheckbox"] label {
 }
 
 /* Buttons */
-.stButton > button, .stDownloadButton > button {
-    background: var(--accent-solid) !important;
-    color: var(--btn-text) !important;
-    border: none !important;
-    border-radius: 999px;
-    font-weight: 600;
-    padding: 0.55rem 1.3rem;
-    transition: filter 0.15s ease, transform 0.15s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+.stButton > button,
+.stDownloadButton > button,
+div[data-testid="stButton"] > button,
+div[data-testid="stDownloadButton"] > button,
+div[data-testid="stButton"] button[kind="primary"],
+div[data-testid="stDownloadButton"] button[kind="primary"],
+div[data-testid="stButton"] button[kind="secondary"],
+div[data-testid="stDownloadButton"] button[kind="secondary"],
+.stButton > button[kind="primary"],
+.stDownloadButton > button[kind="primary"] {
+    background: var(--btn-bg, #172B40) !important;
+    background-color: var(--btn-bg, #172B40) !important;
+    color: var(--btn-text, #67E8F9) !important;
+    border: 1px solid var(--btn-border, #22D3EE) !important;
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    padding: 0.55rem 1.3rem !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+    outline: none !important;
 }
 
-.stButton > button:hover, .stDownloadButton > button:hover {
-    filter: brightness(1.08);
+/* Ensure text and icons inside buttons inherit the button text color */
+.stButton button p,
+.stButton button span,
+.stButton button div,
+.stDownloadButton button p,
+.stDownloadButton button span,
+.stDownloadButton button div,
+div[data-testid="stButton"] button p,
+div[data-testid="stButton"] button span,
+div[data-testid="stButton"] button [data-testid="stMarkdownContainer"] p,
+div[data-testid="stDownloadButton"] button p,
+div[data-testid="stDownloadButton"] button span,
+div[data-testid="stDownloadButton"] button [data-testid="stMarkdownContainer"] p {
+    color: inherit !important;
+}
+
+/* Subtle hover state: slightly lighter background and brighter cyan border */
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+div[data-testid="stButton"] > button:hover,
+div[data-testid="stDownloadButton"] > button:hover,
+div[data-testid="stButton"] button[kind="primary"]:hover,
+div[data-testid="stDownloadButton"] button[kind="primary"]:hover,
+div[data-testid="stButton"] button[kind="secondary"]:hover,
+div[data-testid="stDownloadButton"] button[kind="secondary"]:hover,
+.stButton > button[kind="primary"]:hover,
+.stDownloadButton > button[kind="primary"]:hover {
+    background: var(--btn-hover-bg, #1E3A57) !important;
+    background-color: var(--btn-hover-bg, #1E3A57) !important;
+    border-color: var(--btn-hover-border, #67E8F9) !important;
+    color: var(--btn-hover-text, #A5F3FC) !important;
     transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 6px rgba(34, 211, 238, 0.25) !important;
+}
+
+/* Active / pressed state */
+.stButton > button:active,
+.stDownloadButton > button:active,
+div[data-testid="stButton"] > button:active,
+div[data-testid="stDownloadButton"] > button:active,
+.stButton > button[kind="primary"]:active,
+.stDownloadButton > button[kind="primary"]:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Visible keyboard-focus state */
+.stButton > button:focus-visible,
+.stDownloadButton > button:focus-visible,
+div[data-testid="stButton"] > button:focus-visible,
+div[data-testid="stDownloadButton"] > button:focus-visible,
+.stButton > button:focus:not(:active),
+.stDownloadButton > button:focus:not(:active),
+div[data-testid="stButton"] button:focus:not(:active),
+div[data-testid="stDownloadButton"] button:focus:not(:active),
+.stButton > button[kind="primary"]:focus-visible,
+.stDownloadButton > button[kind="primary"]:focus-visible {
+    outline: 2px solid var(--btn-border, #22D3EE) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px var(--btn-focus-ring, rgba(34, 211, 238, 0.45)) !important;
+}
+
+/* Disabled state: visually distinguishable with readable text */
+.stButton > button:disabled,
+.stButton > button[disabled],
+.stDownloadButton > button:disabled,
+.stDownloadButton > button[disabled],
+div[data-testid="stButton"] button:disabled,
+div[data-testid="stDownloadButton"] button:disabled,
+.stButton > button[kind="primary"]:disabled,
+.stDownloadButton > button[kind="primary"]:disabled {
+    background: var(--btn-disabled-bg, rgba(23, 43, 64, 0.5)) !important;
+    background-color: var(--btn-disabled-bg, rgba(23, 43, 64, 0.5)) !important;
+    color: var(--btn-disabled-text, rgba(103, 232, 249, 0.5)) !important;
+    border-color: var(--btn-disabled-border, rgba(34, 211, 238, 0.25)) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    pointer-events: none;
 }
 
 /* ---- File Uploader ---- */
@@ -374,7 +462,8 @@ div[data-testid="stFileUploader"] {
 
 /* Browse files button inside uploader dropzone */
 [data-testid="stFileUploaderDropzone"] button,
-[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"] {
+[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"],
+[data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"] {
     background: var(--bg-surface-hover) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border-color) !important;
@@ -386,7 +475,8 @@ div[data-testid="stFileUploader"] {
 }
 
 [data-testid="stFileUploaderDropzone"] button:hover,
-[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"]:hover {
+[data-testid="stFileUploaderDropzone"] [data-testid="baseButton-secondary"]:hover,
+[data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"]:hover {
     border-color: var(--accent-solid) !important;
     color: var(--accent-solid) !important;
     background: var(--bg-surface) !important;

@@ -42,10 +42,21 @@ LIGHT_COLORS = ColorTokens(
     input_border="#CBD5E1",    # Subtle border
     input_text="#0f172a",      # Dark text in inputs as requested
     input_placeholder="#94a3b8",
-    btn_text="#FFFFFF",        # White text on #0284c7
     card_shadow="0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)",
     code_bg="#F1F5F9",
     code_text="#0f172a",
+
+    # Action and download buttons (Light theme equivalent: Sky-600 with high contrast)
+    btn_bg="#0284C7",
+    btn_text="#FFFFFF",
+    btn_border="#0369A1",
+    btn_hover_bg="#0369A1",
+    btn_hover_border="#075985",
+    btn_hover_text="#FFFFFF",
+    btn_focus_ring="rgba(2, 132, 199, 0.45)",
+    btn_disabled_bg="#E2E8F0",
+    btn_disabled_text="#94A3B8",
+    btn_disabled_border="#CBD5E1",
 
     # Status chips in light theme (high contrast on white cards)
     chip_critical_bg="#FFF1F2",
@@ -123,7 +134,16 @@ def light_css_variables_block() -> str:
         --input-border: {c.input_border};
         --input-text: {c.input_text};
         --input-placeholder: {c.input_placeholder};
+        --btn-bg: {c.btn_bg};
         --btn-text: {c.btn_text};
+        --btn-border: {c.btn_border};
+        --btn-hover-bg: {c.btn_hover_bg};
+        --btn-hover-border: {c.btn_hover_border};
+        --btn-hover-text: {c.btn_hover_text};
+        --btn-focus-ring: {c.btn_focus_ring};
+        --btn-disabled-bg: {c.btn_disabled_bg};
+        --btn-disabled-text: {c.btn_disabled_text};
+        --btn-disabled-border: {c.btn_disabled_border};
         --card-shadow: {c.card_shadow};
         --code-bg: {c.code_bg};
         --code-text: {c.code_text};

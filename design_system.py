@@ -46,10 +46,21 @@ class ColorTokens:
     input_border: str = "rgba(148, 163, 184, 0.2)"
     input_text: str = "#f8fafc"
     input_placeholder: str = "#64748b"
-    btn_text: str = "#04141a"
     card_shadow: str = "0 4px 6px -1px rgba(0, 0, 0, 0.25)"
     code_bg: str = "#0E1726"
     code_text: str = "#f8fafc"
+
+    # Action and download buttons (Option 3: Dark SOC palette)
+    btn_bg: str = "#172B40"
+    btn_text: str = "#67E8F9"
+    btn_border: str = "#22D3EE"
+    btn_hover_bg: str = "#1E3A57"
+    btn_hover_border: str = "#67E8F9"
+    btn_hover_text: str = "#A5F3FC"
+    btn_focus_ring: str = "rgba(34, 211, 238, 0.45)"
+    btn_disabled_bg: str = "rgba(23, 43, 64, 0.5)"
+    btn_disabled_text: str = "rgba(103, 232, 249, 0.5)"
+    btn_disabled_border: str = "rgba(34, 211, 238, 0.25)"
 
     # Status chips
     chip_critical_bg: str = "rgba(244, 63, 94, 0.14)"
@@ -168,7 +179,16 @@ def css_variables_block() -> str:
         --input-border: {c.input_border};
         --input-text: {c.input_text};
         --input-placeholder: {c.input_placeholder};
+        --btn-bg: {c.btn_bg};
         --btn-text: {c.btn_text};
+        --btn-border: {c.btn_border};
+        --btn-hover-bg: {c.btn_hover_bg};
+        --btn-hover-border: {c.btn_hover_border};
+        --btn-hover-text: {c.btn_hover_text};
+        --btn-focus-ring: {c.btn_focus_ring};
+        --btn-disabled-bg: {c.btn_disabled_bg};
+        --btn-disabled-text: {c.btn_disabled_text};
+        --btn-disabled-border: {c.btn_disabled_border};
         --card-shadow: {c.card_shadow};
         --code-bg: {c.code_bg};
         --code-text: {c.code_text};

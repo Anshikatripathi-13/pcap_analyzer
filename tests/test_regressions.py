@@ -458,6 +458,9 @@ def test_dark_theme_color_tokens_and_variables():
     assert "--bg-surface: #141D2E" in css
     assert "--input-bg: #0E1726" in css
     assert "--input-text: #f8fafc" in css
+    assert "--btn-bg: #172B40" in css
+    assert "--btn-text: #67E8F9" in css
+    assert "--btn-border: #22D3EE" in css
     assert "--card-shadow:" in css
     assert "--alert-error-bg:" in css
     assert "--alert-success-bg:" in css
@@ -480,6 +483,9 @@ def test_light_theme_color_tokens_and_variables():
     assert "--bg-surface: #FFFFFF" in css
     assert "--input-bg: #FFFFFF" in css
     assert "--input-text: #0f172a" in css
+    assert "--btn-bg: #0284C7" in css
+    assert "--btn-text: #FFFFFF" in css
+    assert "--btn-border: #0369A1" in css
 
     # Must NOT contain geometric background mesh
     assert ".stApp::before" not in css
@@ -620,4 +626,19 @@ def test_theme_css_uploader_and_table_rules():
     assert "var(--table-header-bg)" in content
     assert 'div[data-testid="stTable"]' in content
 
+
+def test_theme_css_button_styling_rules():
+    """Verifies assets/theme.css has targeted button styles with Option 3 fallbacks."""
+    theme_css_path = Path(__file__).parent.parent / "assets" / "theme.css"
+    content = theme_css_path.read_text(encoding="utf-8")
+
+    assert ".stButton > button" in content
+    assert ".stDownloadButton > button" in content
+    assert "var(--btn-bg, #172B40)" in content
+    assert "var(--btn-text, #67E8F9)" in content
+    assert "var(--btn-border, #22D3EE)" in content
+    assert "var(--btn-hover-bg, #1E3A57)" in content
+    assert "var(--btn-hover-text, #A5F3FC)" in content
+    assert "var(--btn-hover-border, #67E8F9)" in content
+    assert '[data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"]' in content
 

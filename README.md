@@ -14,8 +14,8 @@ This project focuses on **automating those investigation tasks**, enabling faste
 |---------------------------|------------------------|
 | Manual packet inspection | Automated traffic analysis dashboard & packet viewer |
 | Manual IOC extraction | One-click extraction of external IPs, domains, and URLs |
-| Manual report writing | Automatic Markdown & tamper-evident PDF forensic report generation |
-| Manual threat hunting | Rule-based threat detection modules (Port Scan, Beaconing, DNS Tunneling, Plaintext Credentials) |
+| Manual report writing | Automatic Markdown & integrity-verifiable PDF forensic report generation |
+| Manual threat hunting | Heuristic rule-based triage modules (Port Scan, Beaconing, DNS Tunneling, Plaintext Credentials) |
 | Limited visualization | Interactive charts, traffic timeline, and network communication graph |
 | Requires display-filter expertise | Beginner-friendly Security Operations Center (SOC) style dashboard |
 
@@ -27,8 +27,8 @@ This project focuses on **automating those investigation tasks**, enabling faste
 - **Frontend & UI:** [Streamlit](https://streamlit.io/) (responsive SOC theme with dark/light mode toggle), [Plotly Express & Graph Objects](https://plotly.com/python/) (interactive visualizations)
 - **Network Analysis:** [NetworkX](https://networkx.org/) (host communication topology), [Pandas](https://pandas.pydata.org/) (statistical aggregation)
 - **Forensic Reporting & Integrity:** [ReportLab](https://www.reportlab.com/) (multi-page PDF generation), Cryptographic hashing (`hashlib` MD5, SHA-1, SHA-256 with sidecars)
-- **Extensibility:** [FastMCP](https://github.com/jlowin/fastmcp) (Model Context Protocol server for AI assistant integrations)
-- **Optional Acceleration:** Native Rust engine (`rust/`) with automatic fallback to pure Python
+- **Extensibility (Optional):** [FastMCP](https://github.com/jlowin/fastmcp) (Optional Model Context Protocol server for AI assistant integrations)
+- **Optional Acceleration:** Optional Rust acceleration (`rust/`) for Shannon entropy calculation and graph edge counting (Scapy handles packet parsing), with an automatic pure-Python fallback when the native extension is unavailable
 
 ---
 
@@ -41,12 +41,15 @@ This project focuses on **automating those investigation tasks**, enabling faste
 - Bidirectional host conversation aggregation and Top Talkers analysis.
 - Interactive Packet Inspector with hex/ASCII payload dumps.
 
-### 2. Rule-Based Threat Detection
-The analyzer automatically inspects traffic for suspicious patterns:
-- **Port Scan Detection:** Identifies reconnaissance activity where a source connects to many destination ports within a short time window.
-- **C2 Beaconing Detection:** Detects periodic Command & Control communication using interval timing analysis and jitter variance.
-- **DNS Tunneling Detection:** Flags data exfiltration over DNS based on subdomain query frequency and Shannon entropy.
-- **Plaintext Credential Exposure:** Detects unencrypted credentials transmitted over HTTP POST, Basic Auth, FTP, and Telnet.
+### 2. Rule-Based Threat Detection & Triage
+The analyzer inspects traffic for suspicious patterns, providing heuristic, rule-based triage indicators to prioritize investigation:
+- **Port Scan Detection:** Flags potential reconnaissance activity when a source contacts many distinct destination ports within a short time window.
+- **C2 Beaconing Detection:** Highlights suspicious periodic communication patterns using connection interval timing and jitter variance.
+- **DNS Tunneling Detection:** Flags potential data exfiltration or tunneling based on high subdomain query volume and elevated Shannon entropy.
+- **Plaintext Credential Exposure:** Surfaces unencrypted credentials transmitted in cleartext over HTTP POST forms, HTTP Basic Auth, FTP, or Telnet.
+
+> [!NOTE]
+> All detection alerts represent heuristic triage indicators to guide forensic investigation, not definitive proof of an attack or compromise. Benign traffic (such as routine network discovery, cloud telemetry polling, or content distribution) can generate similar patterns and may produce false positives that require manual validation.
 
 ### 3. Password Forensics & Triage
 - Specialized credential inspector identifying exposed usernames, passwords, and tokens.
@@ -63,8 +66,11 @@ The analyzer automatically inspects traffic for suspicious patterns:
 ### 5. Evidence Integrity & Cryptographic Sidecars
 - Cryptographic hash generation for uploaded evidence captures (MD5, SHA-1, SHA-256).
 - Detached SHA-256 integrity sidecars (`<report>.pdf.sha256`) generated automatically upon PDF export, containing `pdf_filename`, `sha256`, `generated_at_utc`, and a unique `report_id`.
-- Both in-dashboard UI verification and standalone CLI audit utility (`hash_verifier.py`) to confirm exported reports remain unaltered.
-- Chain-of-custody guarantee: reports never assert their own hashes internally, avoiding circular hash mutation.
+- Both in-dashboard UI verification and standalone CLI audit utility (`hash_verifier.py`) to confirm exported reports match their recorded hash and have not been altered or corrupted after export.
+- Reports avoid circular hash mutation by keeping hashes in external sidecars rather than asserting self-referential checksums internally.
+
+> [!NOTE]
+> SHA-256 sidecars help verify whether an exported report matches its recorded checksum and has not suffered accidental modification or corruption. They do not constitute a cryptographic digital signature, trusted timestamp authority, or complete legal chain-of-custody system.
 
 ### 6. Dual-Format Forensic Reporting
 - **PDF Report Generation:** Professional multi-page forensic report built with ReportLab, featuring case metadata, evidence summaries, severity charts, threat alert breakdowns, and an accompanying detached `.sha256` integrity sidecar.
@@ -78,8 +84,9 @@ The analyzer automatically inspects traffic for suspicious patterns:
 - Host communication topology graph powered by NetworkX and Plotly.
 - Second-by-second packet rate (PPS) and bandwidth consumption timeline charts.
 
-### 8. Model Context Protocol (MCP) Server (Experimental)
-- Experimental FastMCP server (`mcp_server/server.py`) designed to allow AI assistants (such as Claude Desktop) to invoke PCAP parsing, statistics, IOC extraction, and threat detectors over stdio.
+### 8. Model Context Protocol (MCP) Server (Experimental & Optional)
+- Optional, experimental FastMCP server (`mcp_server/server.py`) designed to allow AI assistants (such as Claude Desktop) to invoke PCAP parsing, statistics, IOC extraction, and threat detectors over stdio.
+- *Optional feature:* The core Streamlit dashboard, CLI triage (`main.py`), and automated test suites do not require the MCP server and run completely independently.
 - *Compatibility note:* Implemented with the FastMCP v1 SDK; requires `pip install 'mcp<2'` (incompatible with `mcp>=2.0` installed in the current environment without pinning).
 
 ---
@@ -104,7 +111,7 @@ pcap-analyzer/
 ├── pdf_report.py                  # Professional PDF report export (ReportLab)
 ├── report_integrity.py            # Cryptographic sidecars & tamper verification
 ├── performance.py                 # In-memory caching & profiling layer
-├── accelerated.py                 # Accelerated parser & graph builder
+├── accelerated.py                 # Accelerated entropy & graph edge aggregation
 ├── design_system.py               # Design tokens, CSS variables & dark theme
 ├── ui_styles.py                   # Light theme tokens & CSS variables
 ├── theme_manager.py               # Theme switcher and CSS injector
@@ -127,8 +134,8 @@ pcap-analyzer/
 │
 ├── rust/
 │   ├── Cargo.toml                 # Optional Rust acceleration package
-│   └── src/lib.rs                 # Native Rust packet parsing routines
-├── rust_bridge.py                 # Python ctypes / PyO3 bridge for Rust
+│   └── src/lib.rs                 # Native Rust routines for entropy & graph edge aggregation
+├── rust_bridge.py                 # PyO3 bridge with transparent pure-Python fallback
 │
 ├── samples/
 │   ├── README.md                  # Sample data documentation
@@ -219,20 +226,20 @@ Verify an exported PDF forensic report against its detached `.sha256` sidecar fi
 
 ---
 
-### 3. Model Context Protocol (MCP) Server (Experimental)
+### 3. Model Context Protocol (MCP) Server (Experimental & Optional)
 
 > [!WARNING]
 > **Optional Dependency Compatibility Notice:**
+> The MCP server is entirely optional; core application features, CLI tools, test suites, and the Streamlit dashboard do not require the MCP server to run.
 > The experimental MCP server (`mcp_server/server.py`) was developed against the Model Context Protocol SDK v1 interface (`from mcp.server.fastmcp import FastMCP`).
 > In the project's current virtual environment, `mcp>=2` is installed (`mcp==2.3.0`), where FastMCP was renamed to `MCPServer`, raising:
 > ```text
 > ModuleNotFoundError: No module named 'mcp.server.fastmcp'
 > ```
-> To run the experimental MCP server, pin or downgrade to FastMCP v1:
+> To run the optional MCP server, pin or downgrade to FastMCP v1:
 > ```powershell
 > pip install "mcp<2"
 > ```
-> Application features, test suites, and Streamlit dashboards do not depend on the MCP server and run completely independently.
 
 Once FastMCP v1 is installed (`pip install "mcp<2"`), you can start the server via stdio:
 ```powershell
@@ -289,9 +296,9 @@ To execute the full test suite:
 > If running tests on a clean clone where `samples/synthetic_investigation.pcap` is not present, regenerate it first using `.\.venv\Scripts\python samples/generate_sample_pcap.py`.
 
 ### Latest Test Suite Status
-All **59 unit and regression tests** pass:
+All **60 unit and regression tests** pass:
 ```text
-============================= 59 passed in 15.59s =============================
+============================= 60 passed in 15.70s =============================
 ```
 
 ---
@@ -390,11 +397,13 @@ This project was developed for academic, educational, and authorized digital for
 
 ---
 
-## Authors
+## Author
 
-**Anshika Tripathi**<br>
-Bachelor of Technology (Computer Science & Engineering) - 3rd year<br>
-ITM, GIDA, Gorakhpur; affiliated to Dr. A.P.J. Abdul Kalam Technical University, Lucknow
+**Anshika Tripathi**
+
+B.Tech in Computer Science and Engineering (Cybersecurity Honors)
+
+Graduation Batch: 2028
 
 ---
 
